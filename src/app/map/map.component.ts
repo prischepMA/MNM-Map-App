@@ -1,5 +1,7 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { DeleteMenu } from '../model/DeleteMenu';
+import MapsEventListener = google.maps.MapsEventListener;
+import { CalculateSquareService } from '../services/calculate-square.service';
 
 @Component({
   selector: 'app-map',
@@ -11,52 +13,94 @@ export class MapComponent implements OnInit {
   @ViewChild('map', {static: true})
   mapElement: any;
   map: google.maps.Map;
-  poly = null;
+  polyline = null;
+  polygon = null;
+  deleteMenu: DeleteMenu = null;
+  isEditing: boolean;
+  rightClickListener: MapsEventListener = null;
+  mapClickListener: MapsEventListener = null;
+  firstVertexClick: MapsEventListener = null;
 
-  constructor() {
+  constructor(private calculateSquare: CalculateSquareService) {
   }
 
   ngOnInit() {
     this.map = new google.maps.Map(this.mapElement.nativeElement, {
-      zoom: 7,
-      center: {lat: 41.879, lng: -87.624}
+      zoom: 4,
+      center: {lat: 41.879, lng: -87.624},
+      fullscreenControl: false
     });
 
-    this.poly = new google.maps.Polyline({
+    this.deleteMenu = new DeleteMenu();
+  }
+
+  addLatLng(event) {
+    const path = this.polyline.getPath();
+    if (path.getAt(0) === path.getAt(path.getLength() - 1) && path.getLength() > 1) {
+      return;
+    }
+
+    path.push(event.latLng);
+  }
+
+  startEditing() {
+    this.isEditing = true;
+    if (this.polygon) {
+      this.polygon.setMap(null);
+    }
+    this.polyline = new google.maps.Polyline({
       editable: true,
       strokeOpacity: 0.7,
       strokeColor: '#75d8ff',
       strokeWeight: 2,
       draggable: true
     });
-    this.poly.setMap(this.map);
 
-    this.map.addListener('click', this.addLatLng.bind(this));
+    this.polyline.setMap(this.map);
 
-    const deleteMenu = new DeleteMenu();
+    this.mapClickListener = this.map.addListener('click', this.addLatLng.bind(this));
 
-    google.maps.event.addListener(this.poly, 'rightclick', (e) => {
+    this.rightClickListener = google.maps.event.addListener(this.polyline, 'rightclick', (e) => {
       if (e.vertex === undefined) {
         return;
       }
-      deleteMenu.open(this.map, this.poly.getPath(), e.vertex);
+      this.deleteMenu.open(this.map, this.polyline.getPath(), e.vertex);
     });
 
-    google.maps.event.addListener(this.poly, 'click', (e) => {
-      const poly = this.poly.getPath();
+    this.firstVertexClick = google.maps.event.addListener(this.polyline, 'click', (e) => {
+      const poly = this.polyline.getPath();
 
-      if (e.vertex === 0 && this.poly.getPath().getLength() > 2) {
+      if (e.vertex === 0 && this.polyline.getPath().getLength() > 2) {
         poly.push(poly.getAt(0));
       }
     });
   }
 
-  addLatLng(event) {
-    const path = this.poly.getPath();
-    if (path.getAt(0) === path.getAt(path.getLength() - 1) && path.getLength() > 1) {
-      return;
-    }
+  cancelEditing() {
+    this.isEditing = false;
+    this.polyline.setMap(null);
+    this.cleanUp();
+  }
 
-    path.push(event.latLng);
+  cleanUp() {
+    google.maps.event.removeListener(this.mapClickListener);
+    google.maps.event.removeListener(this.rightClickListener);
+    google.maps.event.removeListener(this.firstVertexClick);
+  }
+
+  savePolygon() {
+    console.log(this.calculateSquare.calculateSquare(this.polyline.getPath()));
+    this.isEditing = false;
+    this.polygon = new google.maps.Polygon({
+      paths: this.polyline.getPath(),
+      strokeColor: '#75d8ff',
+      strokeOpacity: 0.8,
+      strokeWeight: 2,
+      fillColor: '#75d8ff',
+      fillOpacity: 0.35
+    });
+    this.polygon.setMap(this.map);
+    this.polyline.setMap(null);
+    this.cleanUp();
   }
 }
