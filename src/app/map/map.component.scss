@@ -1,0 +1,22 @@
+.map {
+  width: 100%;
+  height: 500px;
+}
+
+.buttons-container {
+  display: flex;
+  width: 100%;
+  margin-top: 10px;
+
+  button {
+    font-size: 20px;
+  }
+}
+
+.editing-in-progress {
+  justify-content: space-between;
+}
+
+.editing-not-started {
+  justify-content: center;
+}
