@@ -1,7 +1,8 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { DeleteMenu } from '../model/DeleteMenu';
 import MapsEventListener = google.maps.MapsEventListener;
 import { CalculateSquareService } from '../services/calculate-square.service';
+import html2canvas from 'html2canvas';
 
 @Component({
   selector: 'app-map',
@@ -10,8 +11,6 @@ import { CalculateSquareService } from '../services/calculate-square.service';
 })
 export class MapComponent implements OnInit {
 
-  @ViewChild('map', {static: true})
-  mapElement: any;
   map: google.maps.Map;
   polyline = null;
   polygon = null;
@@ -20,6 +19,10 @@ export class MapComponent implements OnInit {
   rightClickListener: MapsEventListener = null;
   mapClickListener: MapsEventListener = null;
   firstVertexClick: MapsEventListener = null;
+
+  @ViewChild('map', {static: true}) mapElement: any;
+  @ViewChild('canvas', {static: true}) canvas: ElementRef;
+  @ViewChild('downloadLink', {static: true}) downloadLink: ElementRef;
 
   constructor(private calculateSquare: CalculateSquareService) {
   }
@@ -102,5 +105,16 @@ export class MapComponent implements OnInit {
     this.polygon.setMap(this.map);
     this.polyline.setMap(null);
     this.cleanUp();
+  }
+
+  downloadImage() {
+    html2canvas(document.querySelector('.gm-style'), {
+      useCORS: true,
+    }).then(canvas => {
+      this.canvas.nativeElement.src = canvas.toDataURL();
+      this.downloadLink.nativeElement.href = canvas.toDataURL('image/png');
+      this.downloadLink.nativeElement.download = 'map.png';
+      this.downloadLink.nativeElement.click();
+    });
   }
 }
