@@ -1,7 +1,6 @@
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { DeleteMenu } from '../model/DeleteMenu';
 import MapsEventListener = google.maps.MapsEventListener;
-import { CalculateSquareService } from '../services/calculate-square.service';
 import html2canvas from 'html2canvas';
 
 @Component({
@@ -19,12 +18,13 @@ export class MapComponent implements OnInit {
   rightClickListener: MapsEventListener = null;
   mapClickListener: MapsEventListener = null;
   firstVertexClick: MapsEventListener = null;
+  mapConfiguration: MapConfiguration = null;
 
   @ViewChild('map', {static: true}) mapElement: any;
   @ViewChild('canvas', {static: true}) canvas: ElementRef;
   @ViewChild('downloadLink', {static: true}) downloadLink: ElementRef;
 
-  constructor(private calculateSquare: CalculateSquareService) {
+  constructor() {
   }
 
   ngOnInit() {
@@ -92,7 +92,7 @@ export class MapComponent implements OnInit {
   }
 
   savePolygon() {
-    console.log(this.calculateSquare.calculateSquare(this.polyline.getPath()));
+    console.log(google.maps.geometry.spherical.computeArea(this.polyline.getPath()));
     this.isEditing = false;
     this.polygon = new google.maps.Polygon({
       paths: this.polyline.getPath(),
@@ -104,6 +104,11 @@ export class MapComponent implements OnInit {
     });
     this.polygon.setMap(this.map);
     this.polyline.setMap(null);
+    this.mapConfiguration = {
+      mapCenter: this.map.getCenter(),
+      path: this.polyline.getPath().getArray(),
+      zoom: this.map.getZoom()
+    };
     this.cleanUp();
   }
 
