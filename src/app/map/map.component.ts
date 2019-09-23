@@ -1,5 +1,7 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { DeleteMenu } from '../model/DeleteMenu';
+import { FirebaseService } from '../services/firebase.service';
+
 import MapsEventListener = google.maps.MapsEventListener;
 import html2canvas from 'html2canvas';
 
@@ -24,7 +26,7 @@ export class MapComponent implements OnInit {
   @ViewChild('canvas', {static: true}) canvas: ElementRef;
   @ViewChild('downloadLink', {static: true}) downloadLink: ElementRef;
 
-  constructor() {
+  constructor( private firebaseService:FirebaseService ) {
   }
 
   ngOnInit() {
@@ -109,6 +111,9 @@ export class MapComponent implements OnInit {
       path: this.polyline.getPath().getArray(),
       zoom: this.map.getZoom()
     };
+
+    console.log(this.mapConfiguration);
+    this.firebaseService.createPolygon(this.mapConfiguration);
     this.cleanUp();
   }
 

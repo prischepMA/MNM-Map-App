@@ -1,7 +1,7 @@
 import LatLng = google.maps.LatLng;
 import MVCArray = google.maps.MVCArray;
 
-interface MapConfiguration {
+ interface MapConfiguration {
   zoom: number;
   path: LatLng[];
   mapCenter: LatLng;
