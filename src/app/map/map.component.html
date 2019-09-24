@@ -6,6 +6,9 @@
   <button mat-raised-button color="accent" (click)="cancelEditing()">Cancel</button>
   <button mat-raised-button color="accent" (click)="savePolygon()">Save</button>
 </div>
+<div class="buttons-container editing-not-started" *ngIf="polygon.map">
+  <button mat-raised-button color="accent" (click)="downloadImage()">Download</button>
+</div>
 <div id="download">
   <img #canvas>
   <a #downloadLink></a>
