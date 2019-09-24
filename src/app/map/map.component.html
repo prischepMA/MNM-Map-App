@@ -1,13 +1,16 @@
-<div #map class="map"></div>
+<div class="map-container">
+  <div #map class="map">
+  </div>
+  <div class="buttons-container editing-not-started download" *ngIf="polygon?.map">
+    <button mat-raised-button (click)="downloadImage()">Download</button>
+  </div>
+</div>
 <div class="buttons-container editing-not-started" *ngIf="!isEditing">
-  <button mat-raised-button color="accent" (click)="startEditing()">Add Polygon</button>
+  <button mat-raised-button color="primary" (click)="startEditing()">Add Polygon</button>
 </div>
 <div class="buttons-container editing-in-progress" *ngIf="isEditing">
-  <button mat-raised-button color="accent" (click)="cancelEditing()">Cancel</button>
-  <button mat-raised-button color="accent" (click)="savePolygon()">Save</button>
-</div>
-<div class="buttons-container editing-not-started" *ngIf="polygon.map">
-  <button mat-raised-button color="accent" (click)="downloadImage()">Download</button>
+  <button mat-raised-button color="primary" (click)="cancelEditing()">Cancel</button>
+  <button mat-raised-button color="primary" (click)="savePolygon()">Save</button>
 </div>
 <div id="download">
   <img #canvas>

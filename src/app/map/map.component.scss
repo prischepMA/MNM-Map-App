@@ -1,8 +1,11 @@
-.map {
-  width: 100%;
-  height: 500px;
+.map-container {
+  position: relative;
+  .map {
+    width: 100%;
+    height: 500px;
+  }
 }
-
+  
 .buttons-container {
   display: flex;
   width: 100%;
@@ -19,6 +22,12 @@
 
 .editing-not-started {
   justify-content: center;
+}
+
+.download {
+  position: absolute;
+  top: -5px;
+  color: dimgray;
 }
 
 #download {
