@@ -107,13 +107,15 @@ export class MapComponent implements OnInit {
     this.polygon.setMap(this.map);
     this.polyline.setMap(null);
     this.mapConfiguration = {
+      // id: сюда докинуть айди которое вели 
       mapCenter: this.map.getCenter(),
       path: this.polyline.getPath().getArray(),
       zoom: this.map.getZoom()
     };
 
-    console.log(this.mapConfiguration);
-    this.firebaseService.createPolygon(this.mapConfiguration);
+    this.firebaseService.createPolygon(this.mapConfiguration)
+    .then(
+      (res) => console.log(res) /* здесь обработочка ошибки. возвращается success = true или false.*/ );
     this.cleanUp();
   }
 
