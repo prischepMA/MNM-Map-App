@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
+import { JSDocCommentStmt } from '@angular/compiler';
 
 @Injectable()
 export class FirebaseService {
@@ -8,6 +9,7 @@ export class FirebaseService {
 
   createPolygon(data: MapConfiguration) {
     const polygonsRef = this.firestore.collection("polygons");
+    console.log("poly to add: " + JSON.stringify(data))
 
     return polygonsRef.doc(data.id)
       .get()
@@ -16,8 +18,10 @@ export class FirebaseService {
         if (doc.exists) {
           return false;
         } else {
-          polygonsRef.add(JSON.parse(JSON.stringify(data)))
-            .then(() => true);
+          console.log('added  ')
+          polygonsRef.doc(data.id)
+            .set(JSON.parse(JSON.stringify(data)));
+          return true;
         }
       });
   }
@@ -29,8 +33,8 @@ export class FirebaseService {
       .get().toPromise()
       .then(function (doc) {
         if (doc.exists) {
-          console.log(doc);
-          return { success: true, polygon: JSON.parse(JSON.stringify(doc)) }; 
+          console.log(doc.data());
+          return { success: true, polygon: doc.data() };
         } else {
           return { success: false };
         }
