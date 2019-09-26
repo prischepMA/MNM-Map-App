@@ -50,10 +50,10 @@ export class FirebaseService {
       .get()
       .toPromise()
       .then((doc) => {
-        if (doc.exists) {
+        if (!doc.exists) {
           return false;
         } else {
-          polygonsRef.doc(data.id)
+          return polygonsRef.doc(data.id)
             .update(JSON.parse(JSON.stringify(data)))
             .then(() => true);
         }
