@@ -1,0 +1,11 @@
+<h1 mat-dialog-title>Save polygon</h1>
+<div mat-dialog-content>
+  <p>Please, enter polygon name</p>
+  <mat-form-field>
+    <input matInput [(ngModel)]="data.polygonName">
+  </mat-form-field>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onCancelClick()">Cancel</button>
+  <button mat-button [mat-dialog-close]="data.polygonName" cdkFocusInitial>Save</button>
+</div>

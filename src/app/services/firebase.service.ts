@@ -30,7 +30,7 @@ export class FirebaseService {
       .then(function (doc) {
         if (doc.exists) {
           console.log(doc);
-          return { success: true }; //, polygon: JSON.parse(doc) 
+          return { success: true, polygon: JSON.parse(JSON.stringify(doc)) }; 
         } else {
           return { success: false };
         }

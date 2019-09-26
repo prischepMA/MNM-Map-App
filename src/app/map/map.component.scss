@@ -22,6 +22,10 @@
 
 .editing-not-started {
   justify-content: center;
+
+  button:first-of-type {
+    margin-right: 10px
+  }
 }
 
 .download {

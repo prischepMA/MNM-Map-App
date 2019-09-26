@@ -4,6 +4,9 @@ import { FirebaseService } from '../services/firebase.service';
 
 import MapsEventListener = google.maps.MapsEventListener;
 import html2canvas from 'html2canvas';
+import { MatDialog } from '@angular/material/dialog';
+import { OpenDialogComponent } from '../dialogs/open-dialog/open-dialog.component';
+import { SaveDialogComponent } from '../dialogs/save-dialog/save-dialog.component';
 
 @Component({
   selector: 'app-map',
@@ -15,18 +18,19 @@ export class MapComponent implements OnInit {
   map: google.maps.Map;
   polyline = null;
   polygon = null;
+  polygonName = null;
   deleteMenu: DeleteMenu = null;
   isEditing: boolean;
   rightClickListener: MapsEventListener = null;
   mapClickListener: MapsEventListener = null;
   firstVertexClick: MapsEventListener = null;
   mapConfiguration: MapConfiguration = null;
-
+  
   @ViewChild('map', {static: true}) mapElement: any;
   @ViewChild('canvas', {static: true}) canvas: ElementRef;
   @ViewChild('downloadLink', {static: true}) downloadLink: ElementRef;
 
-  constructor( private firebaseService:FirebaseService ) {
+  constructor( private firebaseService:FirebaseService, public dialog: MatDialog ) {
   }
 
   ngOnInit() {
@@ -49,6 +53,7 @@ export class MapComponent implements OnInit {
   }
 
   startEditing() {
+    this.polygonName = null;
     this.isEditing = true;
     if (this.polygon) {
       this.polygon.setMap(null);
@@ -63,6 +68,21 @@ export class MapComponent implements OnInit {
 
     this.polyline.setMap(this.map);
 
+    this.initListenersForEditing();
+  }
+
+  startEditingExistingPolygon() {
+    this.isEditing = true;
+    if (this.polygon) {
+      this.polygon.setMap(null);
+    }
+
+    this.polyline.setMap(this.map);
+
+    this.initListenersForEditing();
+  }
+
+  initListenersForEditing() {
     this.mapClickListener = this.map.addListener('click', this.addLatLng.bind(this));
 
     this.rightClickListener = google.maps.event.addListener(this.polyline, 'rightclick', (e) => {
@@ -84,6 +104,7 @@ export class MapComponent implements OnInit {
   cancelEditing() {
     this.isEditing = false;
     this.polyline.setMap(null);
+    this.polygonName = null;
     this.cleanUp();
   }
 
@@ -93,7 +114,7 @@ export class MapComponent implements OnInit {
     google.maps.event.removeListener(this.firstVertexClick);
   }
 
-  savePolygon() {
+  savePolygon(name) {
     console.log(google.maps.geometry.spherical.computeArea(this.polyline.getPath()));
     this.isEditing = false;
     this.polygon = new google.maps.Polygon({
@@ -107,7 +128,7 @@ export class MapComponent implements OnInit {
     this.polygon.setMap(this.map);
     this.polyline.setMap(null);
     this.mapConfiguration = {
-      // id: сюда докинуть айди которое вели 
+      id: name,
       mapCenter: this.map.getCenter(),
       path: this.polyline.getPath().getArray(),
       zoom: this.map.getZoom()
@@ -117,6 +138,38 @@ export class MapComponent implements OnInit {
     .then(
       (res) => console.log(res) /* здесь обработочка ошибки. возвращается success = true или false.*/ );
     this.cleanUp();
+  }
+
+  openSaveDialog() {
+    if (this.polygonName !== null) {
+      this.savePolygon(this.polygonName);
+      return;
+    }
+    const dialogRef = this.dialog.open(SaveDialogComponent, {
+      width: '300px',
+      data: {polygonName: ''}
+    });
+
+    dialogRef.afterClosed().subscribe(name => {
+      if (name !== undefined) {
+        this.savePolygon(name);
+        this.polygonName = name;
+      }
+    });
+  }
+
+  openOpenDialog() {
+    const dialogRef = this.dialog.open(OpenDialogComponent, {
+      width: '300px',
+      data: {polygonName: ''}
+    });
+
+    dialogRef.afterClosed().subscribe(name => {
+      if (name !== undefined) {
+        console.log(this.firebaseService.getPolygon(name));
+        this.polygonName = name;
+      }
+    });
   }
 
   downloadImage() {
