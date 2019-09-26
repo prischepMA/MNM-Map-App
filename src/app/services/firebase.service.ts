@@ -38,4 +38,21 @@ export class FirebaseService {
         console.log("Error getting document:", error);
       });
   }
+
+  updatePolygon(data: MapConfiguration) {
+    const polygonsRef = this.firestore.collection("polygons");
+
+    return polygonsRef.doc(data.id)
+      .get()
+      .toPromise()
+      .then((doc) => {
+        if (doc.exists) {
+          return false;
+        } else {
+          polygonsRef.doc(data.id)
+            .update(JSON.parse(JSON.stringify(data)))
+            .then(() => true);
+        }
+      });
+  }
 }
