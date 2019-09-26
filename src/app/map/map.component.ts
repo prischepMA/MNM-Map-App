@@ -25,6 +25,22 @@ export class MapComponent implements OnInit {
   mapClickListener: MapsEventListener = null;
   firstVertexClick: MapsEventListener = null;
   mapConfiguration: MapConfiguration = null;
+
+  polylineConfig = {
+    editable: true,
+    strokeOpacity: 0.7,
+    strokeColor: '#75d8ff',
+    strokeWeight: 2,
+    draggable: true
+  }
+
+  polygonConfig = {
+    strokeColor: '#75d8ff',
+    strokeOpacity: 0.8,
+    strokeWeight: 2,
+    fillColor: '#75d8ff',
+    fillOpacity: 0.35
+  }
   
   @ViewChild('map', {static: true}) mapElement: any;
   @ViewChild('canvas', {static: true}) canvas: ElementRef;
@@ -58,13 +74,7 @@ export class MapComponent implements OnInit {
     if (this.polygon) {
       this.polygon.setMap(null);
     }
-    this.polyline = new google.maps.Polyline({
-      editable: true,
-      strokeOpacity: 0.7,
-      strokeColor: '#75d8ff',
-      strokeWeight: 2,
-      draggable: true
-    });
+    this.polyline = new google.maps.Polyline(this.polylineConfig);
 
     this.polyline.setMap(this.map);
 
@@ -114,16 +124,12 @@ export class MapComponent implements OnInit {
     google.maps.event.removeListener(this.firstVertexClick);
   }
 
-  savePolygon(name) {
+  savePolygon(name, update=false) {
     console.log(google.maps.geometry.spherical.computeArea(this.polyline.getPath()));
     this.isEditing = false;
     this.polygon = new google.maps.Polygon({
       paths: this.polyline.getPath(),
-      strokeColor: '#75d8ff',
-      strokeOpacity: 0.8,
-      strokeWeight: 2,
-      fillColor: '#75d8ff',
-      fillOpacity: 0.35
+      ...this.polygonConfig
     });
     this.polygon.setMap(this.map);
     this.polyline.setMap(null);
@@ -133,16 +139,21 @@ export class MapComponent implements OnInit {
       path: this.polyline.getPath().getArray(),
       zoom: this.map.getZoom()
     };
-
-    this.firebaseService.createPolygon(this.mapConfiguration)
-    .then(
-      (res) => console.log(res) /* здесь обработочка ошибки. возвращается success = true или false.*/ );
+    if (!update) {
+      this.firebaseService.createPolygon(this.mapConfiguration)
+      .then(
+        (res) => console.log(res) /* здесь обработочка ошибки. возвращается success = true или false.*/ );
+    } else {
+      this.firebaseService.updatePolygon(this.mapConfiguration)
+      .then(
+        (res) => console.log(res) );
+    }
     this.cleanUp();
   }
 
   openSaveDialog() {
     if (this.polygonName !== null) {
-      this.savePolygon(this.polygonName);
+      this.savePolygon(this.polygonName, true);
       return;
     }
     const dialogRef = this.dialog.open(SaveDialogComponent, {
@@ -165,10 +176,31 @@ export class MapComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(name => {
-      if (name !== undefined) {
-        console.log(this.firebaseService.getPolygon(name));
-        this.polygonName = name;
+      if (name === undefined) {
+        return;
       }
+      this.firebaseService.getPolygon(name).then(
+        (res) =>  { 
+          let mapCfg = res['polygon'];
+          this.polygonName = name;
+      
+          this.polyline = new google.maps.Polyline({
+            path: mapCfg.path,
+            ...this.polylineConfig
+          });
+
+          this.polygon = new google.maps.Polygon({
+            paths: this.polyline.getPath(),
+            ...this.polygonConfig
+          });
+          this.polygon.setMap(this.map);
+          
+          this.map.setCenter(mapCfg.mapCenter);
+          this.map.setZoom(mapCfg.zoom);
+        }
+      );
+          
+      
     });
   }
 

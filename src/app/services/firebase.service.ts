@@ -27,20 +27,20 @@ export class FirebaseService {
   }
 
   getPolygon(id: string) {
-    this.firestore
-      .collection("polygons")
-      .doc(id)
-      .get().toPromise()
-      .then(function (doc) {
-        if (doc.exists) {
-          console.log(doc.data());
-          return { success: true, polygon: doc.data() };
-        } else {
-          return { success: false };
-        }
-      }).catch(function (error) {
-        console.log("Error getting document:", error);
-      });
+    return this.firestore
+        .collection("polygons")
+        .doc(id)
+        .get().toPromise()
+        .then(function (doc) {
+          if (doc.exists) {
+            console.log(doc.data());
+            return { success: true, polygon: doc.data() };
+          } else {
+            return { success: false };
+          }
+        }).catch(function (error) {
+          console.log("Error getting document:", error);
+        });
   }
 
   updatePolygon(data: MapConfiguration) {
