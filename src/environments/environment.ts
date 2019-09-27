@@ -5,13 +5,13 @@
 export const environment = {
   production: false,
   firebaseConfig: {
-    apiKey: "AIzaSyCgMFsVBkgxT0L5C3fT8IPk1dSvOGQN9PU",
-    authDomain: "mnm-app-30228.firebaseapp.com",
-    databaseURL: "https://mnm-app-30228.firebaseio.com",
-    projectId: "mnm-app-30228",
-    storageBucket: "mnm-app-30228.appspot.com",
-    messagingSenderId: "444460722818",
-    appId: "1:444460722818:web:e830c1d703c8440c45629b"
+    apiKey: 'AIzaSyCgMFsVBkgxT0L5C3fT8IPk1dSvOGQN9PU',
+    authDomain: 'mnm-app-30228.firebaseapp.com',
+    databaseURL: 'https://mnm-app-30228.firebaseio.com',
+    projectId: 'mnm-app-30228',
+    storageBucket: 'mnm-app-30228.appspot.com',
+    messagingSenderId: '444460722818',
+    appId: '1:444460722818:web:e830c1d703c8440c45629b'
   }
 };
 

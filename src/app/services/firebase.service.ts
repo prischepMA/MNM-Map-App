@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
-import { JSDocCommentStmt } from '@angular/compiler';
 
 @Injectable()
 export class FirebaseService {
@@ -8,8 +7,8 @@ export class FirebaseService {
   }
 
   createPolygon(data: MapConfiguration) {
-    const polygonsRef = this.firestore.collection("polygons");
-    console.log("poly to add: " + JSON.stringify(data))
+    const polygonsRef = this.firestore.collection('polygons');
+    console.log('poly to add: ' + JSON.stringify(data));
 
     return polygonsRef.doc(data.id)
       .get()
@@ -18,7 +17,7 @@ export class FirebaseService {
         if (doc.exists) {
           return false;
         } else {
-          console.log('added  ')
+          console.log('added  ');
           polygonsRef.doc(data.id)
             .set(JSON.parse(JSON.stringify(data)));
           return true;
@@ -28,23 +27,23 @@ export class FirebaseService {
 
   getPolygon(id: string) {
     return this.firestore
-        .collection("polygons")
+        .collection('polygons')
         .doc(id)
         .get().toPromise()
-        .then(function (doc) {
+        .then((doc) => {
           if (doc.exists) {
             console.log(doc.data());
             return { success: true, polygon: doc.data() };
           } else {
             return { success: false };
           }
-        }).catch(function (error) {
-          console.log("Error getting document:", error);
+        }).catch((error) => {
+          console.log('Error getting document:', error);
         });
   }
 
   updatePolygon(data: MapConfiguration) {
-    const polygonsRef = this.firestore.collection("polygons");
+    const polygonsRef = this.firestore.collection('polygons');
 
     return polygonsRef.doc(data.id)
       .get()

@@ -32,7 +32,7 @@ export class MapComponent implements OnInit {
     strokeColor: '#75d8ff',
     strokeWeight: 2,
     draggable: true
-  }
+  };
 
   polygonConfig = {
     strokeColor: '#75d8ff',
@@ -40,13 +40,13 @@ export class MapComponent implements OnInit {
     strokeWeight: 2,
     fillColor: '#75d8ff',
     fillOpacity: 0.35
-  }
-  
+  };
+
   @ViewChild('map', {static: true}) mapElement: any;
   @ViewChild('canvas', {static: true}) canvas: ElementRef;
   @ViewChild('downloadLink', {static: true}) downloadLink: ElementRef;
 
-  constructor( private firebaseService:FirebaseService, public dialog: MatDialog ) {
+  constructor(private firebaseService: FirebaseService, public dialog: MatDialog) {
   }
 
   ngOnInit() {
@@ -124,7 +124,7 @@ export class MapComponent implements OnInit {
     google.maps.event.removeListener(this.firstVertexClick);
   }
 
-  savePolygon(name, update=false) {
+  savePolygon(name, update = false) {
     console.log(google.maps.geometry.spherical.computeArea(this.polyline.getPath()));
     this.isEditing = false;
     this.polygon = new google.maps.Polygon({
@@ -141,12 +141,12 @@ export class MapComponent implements OnInit {
     };
     if (!update) {
       this.firebaseService.createPolygon(this.mapConfiguration)
-      .then(
-        (res) => console.log(res) /* здесь обработочка ошибки. возвращается success = true или false.*/ );
+        .then(
+          (res) => console.log(res) /* здесь обработочка ошибки. возвращается success = true или false.*/);
     } else {
       this.firebaseService.updatePolygon(this.mapConfiguration)
-      .then(
-        (res) => console.log(res) );
+        .then(
+          (res) => console.log(res));
     }
     this.cleanUp();
   }
@@ -157,7 +157,7 @@ export class MapComponent implements OnInit {
       return;
     }
     const dialogRef = this.dialog.open(SaveDialogComponent, {
-      width: '300px',
+      width: '250px',
       data: {polygonName: ''}
     });
 
@@ -171,7 +171,7 @@ export class MapComponent implements OnInit {
 
   openOpenDialog() {
     const dialogRef = this.dialog.open(OpenDialogComponent, {
-      width: '300px',
+      width: '240px',
       data: {polygonName: ''}
     });
 
@@ -179,28 +179,31 @@ export class MapComponent implements OnInit {
       if (name === undefined) {
         return;
       }
+      if (this.polygon) {
+        this.polygon.setMap(null);
+      }
       this.firebaseService.getPolygon(name).then(
-        (res) =>  { 
-          let mapCfg = res['polygon'];
-          this.polygonName = name;
-      
-          this.polyline = new google.maps.Polyline({
-            path: mapCfg.path,
-            ...this.polylineConfig
-          });
+        (res) => {
+          const mapCfg = res['polygon'];
+          if (mapCfg) {
+            this.polygonName = name;
 
-          this.polygon = new google.maps.Polygon({
-            paths: this.polyline.getPath(),
-            ...this.polygonConfig
-          });
-          this.polygon.setMap(this.map);
-          
-          this.map.setCenter(mapCfg.mapCenter);
-          this.map.setZoom(mapCfg.zoom);
+            this.polyline = new google.maps.Polyline({
+              path: mapCfg.path,
+              ...this.polylineConfig
+            });
+
+            this.polygon = new google.maps.Polygon({
+              paths: this.polyline.getPath(),
+              ...this.polygonConfig
+            });
+            this.polygon.setMap(this.map);
+
+            this.map.setCenter(mapCfg.mapCenter);
+            this.map.setZoom(mapCfg.zoom);
+          }
         }
       );
-          
-      
     });
   }
 
