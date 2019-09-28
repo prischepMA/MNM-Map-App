@@ -5,6 +5,17 @@
     <button mat-raised-button (click)="downloadImage()">Download</button>
     <button mat-raised-button color="primary" (click)="startEditingExistingPolygon()">Edit</button>
   </div>
+  <mat-card class="select-map-type" #selectMapType>
+    <mat-form-field>
+      <mat-label>Map type</mat-label>
+      <mat-select (selectionChange)="onChangeMapType($event.value)">
+        <mat-option value="roadmap">ROADMAP</mat-option>
+        <mat-option value="satellite">SATELLITE</mat-option>
+        <mat-option value="hybrid">HYBRID</mat-option>
+        <mat-option value="terrain">TERRAIN</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </mat-card>
 </div>
 <div class="buttons-container editing-not-started" *ngIf="!isEditing">
   <button mat-raised-button color="primary" (click)="startEditing()">Add Polygon</button>

@@ -45,6 +45,10 @@ export class MapComponent implements OnInit {
   @ViewChild('map', {static: true}) mapElement: any;
   @ViewChild('canvas', {static: true}) canvas: ElementRef;
   @ViewChild('downloadLink', {static: true}) downloadLink: ElementRef;
+  @ViewChild('selectMapType', {
+    read: ElementRef,
+    static: true
+  }) private mapSelector: ElementRef;
 
   constructor(private firebaseService: FirebaseService, public dialog: MatDialog) {
   }
@@ -216,5 +220,9 @@ export class MapComponent implements OnInit {
       this.downloadLink.nativeElement.download = 'map.png';
       this.downloadLink.nativeElement.click();
     });
+  }
+
+  onChangeMapType(event) {
+    this.map.setMapTypeId(event);
   }
 }
