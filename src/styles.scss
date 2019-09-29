@@ -1,6 +1,11 @@
 /* You can add global styles to this file, and also import other style files */
 @import '~@angular/material/prebuilt-themes/deeppurple-amber.css';
 
+.text-content {
+  display: flex;
+  justify-content: center;
+}
+
 .delete-menu {
   position: absolute;
   background: white;
@@ -27,6 +32,14 @@
 
   h1 {
     text-align: center;
+  }
+}
+
+.snack-bar {
+  background-color: red;
+  color: white;
+  button {
+    color: white;
   }
 }
 

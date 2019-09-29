@@ -7,6 +7,7 @@ import html2canvas from 'html2canvas';
 import { MatDialog } from '@angular/material/dialog';
 import { OpenDialogComponent } from '../dialogs/open-dialog/open-dialog.component';
 import { SaveDialogComponent } from '../dialogs/save-dialog/save-dialog.component';
+import { MatSnackBar } from '@angular/material';
 
 @Component({
   selector: 'app-map',
@@ -25,6 +26,7 @@ export class MapComponent implements OnInit {
   mapClickListener: MapsEventListener = null;
   firstVertexClick: MapsEventListener = null;
   mapConfiguration: MapConfiguration = null;
+  calculatedSquare: string;
 
   polylineConfig = {
     editable: true,
@@ -50,7 +52,9 @@ export class MapComponent implements OnInit {
     static: true
   }) private mapSelector: ElementRef;
 
-  constructor(private firebaseService: FirebaseService, public dialog: MatDialog) {
+  constructor(private firebaseService: FirebaseService,
+              public dialog: MatDialog,
+              private snackBar: MatSnackBar) {
   }
 
   ngOnInit() {
@@ -129,7 +133,7 @@ export class MapComponent implements OnInit {
   }
 
   savePolygon(name, update = false) {
-    console.log(google.maps.geometry.spherical.computeArea(this.polyline.getPath()));
+    this.calculatedSquare = google.maps.geometry.spherical.computeArea(this.polyline.getPath()).toFixed(1);
     this.isEditing = false;
     this.polygon = new google.maps.Polygon({
       paths: this.polyline.getPath(),
@@ -166,9 +170,12 @@ export class MapComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(name => {
-      if (name !== undefined) {
-        this.savePolygon(name);
-        this.polygonName = name;
+
+      if (name !== '') {
+        if (name) {
+          this.savePolygon(name);
+          this.polygonName = name;
+        }
       }
     });
   }
@@ -180,7 +187,8 @@ export class MapComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(name => {
-      if (name === undefined) {
+      console.log(name);
+      if (name === undefined || name === '') {
         return;
       }
       if (this.polygon) {
@@ -196,7 +204,7 @@ export class MapComponent implements OnInit {
               path: mapCfg.path,
               ...this.polylineConfig
             });
-
+            this.calculatedSquare = google.maps.geometry.spherical.computeArea(this.polyline.getPath()).toFixed(1);
             this.polygon = new google.maps.Polygon({
               paths: this.polyline.getPath(),
               ...this.polygonConfig
@@ -205,6 +213,12 @@ export class MapComponent implements OnInit {
 
             this.map.setCenter(mapCfg.mapCenter);
             this.map.setZoom(mapCfg.zoom);
+          } else {
+            this.snackBar.open('Failed to get the specified file', 'OK', {
+                duration: 3000,
+                panelClass: ['snack-bar']
+              }
+            );
           }
         }
       );
